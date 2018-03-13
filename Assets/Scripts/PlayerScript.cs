@@ -1,11 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
 
 public class PlayerScript : MonoBehaviour {
 
     [SerializeField] float speed;
     private Rigidbody2D body;
+    private float fullHealth = 15;
+    private float health;
+    private float percentageHealth = 100;
+    public Text lifeText;
 
     [SerializeField] private Transform bulletSpawn;
     [SerializeField] private GameObject bulletPrefab;
@@ -17,6 +24,8 @@ public class PlayerScript : MonoBehaviour {
     void Start ()
     {
         body = GetComponent<Rigidbody2D>();
+        health = fullHealth;
+        SetLifeText();
 	}
 	
 	// Update is called once per frame
@@ -26,9 +35,9 @@ public class PlayerScript : MonoBehaviour {
         float moveVertical = Input.GetAxis("Vertical");
         Vector2 movement = new Vector2(moveHorizontal * speed, moveVertical * speed);
         body.velocity = movement;
-        Debug.Log(Input.GetAxis("Horizontal"));
 
         Attack();
+        playerDead();
     }
 
     public void Attack()
@@ -44,8 +53,31 @@ public class PlayerScript : MonoBehaviour {
         }
     }
 
+    private void Health()
+    {
+        health = health - 1;
+        percentageHealth = health / fullHealth*100;
+        SetLifeText();
+    }
+
+    private void playerDead()
+    {
+        if(health <= 0)
+        {
+            SceneManager.LoadScene("Defeat");
+        }
+    }
+
+    private void SetLifeText()
+    {
+        lifeText.text = percentageHealth.ToString("F0")+" %";
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        
+        if (collision.tag == "OneDamage")
+        {
+            Health();
+        }
     }
 }
