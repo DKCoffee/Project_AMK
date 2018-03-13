@@ -13,6 +13,7 @@ public class PlayerScript : MonoBehaviour {
     private float health;
     private float percentageHealth = 100;
     public Text lifeText;
+    private bool invicible = false;
 
     [SerializeField] private Transform bulletSpawn;
     [SerializeField] private GameObject bulletPrefab;
@@ -26,6 +27,7 @@ public class PlayerScript : MonoBehaviour {
         body = GetComponent<Rigidbody2D>();
         health = fullHealth;
         SetLifeText();
+        
 	}
 	
 	// Update is called once per frame
@@ -56,6 +58,7 @@ public class PlayerScript : MonoBehaviour {
     private void Health()
     {
         health = health - 1;
+        invicible = true;
         percentageHealth = health / fullHealth*100;
         SetLifeText();
     }
@@ -73,11 +76,33 @@ public class PlayerScript : MonoBehaviour {
         lifeText.text = percentageHealth.ToString("F0")+" %";
     }
 
+    private IEnumerator Flash()
+    {
+
+            GetComponent<SpriteRenderer>().color = Color.red;
+            yield return new WaitForSeconds(.1f);
+        for (int i = 0; i < 5 ; i++)
+        {
+            GetComponent<SpriteRenderer>().color = Color.clear;
+            yield return new WaitForSeconds(.2f);
+
+            GetComponent<SpriteRenderer>().color = Color.blue;
+            yield return new WaitForSeconds(.2f);
+        }
+        invicible = false;
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag == "OneDamage")
+        if (!invicible)
         {
-            Health();
+            if (collision.tag == "OneDamage")
+            {
+
+                Health();
+
+                StartCoroutine(Flash());
+            }
         }
     }
 }
